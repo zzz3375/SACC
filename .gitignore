@@ -42,7 +42,5 @@ yarn.lock
 package-lock.json
 
 # data
-concrete_crack/
-crack_mask/
 out*/
 data/
