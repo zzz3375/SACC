@@ -9,9 +9,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-data_path = Path("./data/concrete_crack");data_path.mkdir(parents=1,exist_ok=1)
-out_path = Path("./out/crack_mask");out_path.mkdir(parents=1,exist_ok=1)
-sam_checkpoint = Path("./sam_vit_h_4b8939.pth")
+
 
 def edge_supression(mask, e=8):
     h,w=mask.shape
@@ -19,29 +17,31 @@ def edge_supression(mask, e=8):
     out[e:h-e,e:w-e] = mask[e:h-e,e:w-e]
     return out
 
+def area_criteria(mask):   
+    return mask["area"]>70_000 
 
-if __name__=="__main__":
-    
+def sam_quantify_crack(img):
     model_type = "vit_h"
     device = "cuda"
     sam = sam_model_registry[model_type](checkpoint=str(sam_checkpoint))
     sam.to(device=device)
     mask_generator = SamAutomaticMaskGenerator(sam)
-    def area_criteria(mask):
-        return mask["area"]>50_000
+    masks = mask_generator.generate(img)
+    filtered_masks = filter(area_criteria, masks)
+    crack = np.ones_like(masks[0]["segmentation"], dtype=bool)
+    for mask in filtered_masks:
+        crack[mask["segmentation"]]=0
+    crack = edge_supression(crack)
+    return crack.astype(int)*255
+
+if __name__=="__main__":
+    data_path = Path("./data/concrete_crack");data_path.mkdir(parents=1,exist_ok=1)
+    out_path = Path("./out/crack_mask");out_path.mkdir(parents=1,exist_ok=1)
+    sam_checkpoint = Path("./sam_vit_h_4b8939.pth")    
     for im_name in os.listdir(data_path):
         
         img = cv2.imread(str(data_path/im_name))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        masks = mask_generator.generate(img)
-        # sorted_mask = sorted(masks,key=(lambda x: x['area']),reverse=True)
-        filtered_masks = filter(area_criteria, masks)
-        crack = np.zeros_like(masks[0]["segmentation"], dtype=bool)
-        
-        for mask in filtered_masks:
-            crack = np.bitwise_or( crack, mask["segmentation"]) 
-        crack = np.bitwise_not(crack).astype(int)*255
-        crack = edge_supression(crack)
+        crack = sam_quantify_crack(img)
         cv2.imwrite(str(out_path/im_name), crack)   
         # del mask_generator
         # del masks
