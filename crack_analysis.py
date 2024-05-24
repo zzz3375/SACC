@@ -9,29 +9,27 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-
-
 def edge_supression(mask, e=8):
     h,w=mask.shape
     out = np.zeros_like(mask)
     out[e:h-e,e:w-e] = mask[e:h-e,e:w-e]
     return out
 
-def area_criteria(mask):   
-    return mask["area"]>70_000 
-
 def sam_quantify_crack(img):
     model_type = "vit_h"
     device = "cuda"
+    
     sam = sam_model_registry[model_type](checkpoint=str(sam_checkpoint))
     sam.to(device=device)
     mask_generator = SamAutomaticMaskGenerator(sam)
     masks = mask_generator.generate(img)
-    filtered_masks = filter(area_criteria, masks)
+    filtered_masks = filter(lambda  mask: mask["area"]>70_000, masks)
+    
     crack = np.ones_like(masks[0]["segmentation"], dtype=bool)
     for mask in filtered_masks:
-        crack[mask["segmentation"]]=0
+        crack[mask["segmentation"]]=False
     crack = edge_supression(crack)
+    
     return crack.astype(int)*255
 
 if __name__=="__main__":
