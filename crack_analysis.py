@@ -1,14 +1,13 @@
+#%%
 import os
-import sys
-# sys.path.append("../")
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 import torch
 import cv2
 import numpy as np
 from pathlib import Path
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-
+#%%
 def edge_supression(mask, e=8):
     h,w=mask.shape
     out = np.zeros_like(mask)
@@ -41,8 +40,5 @@ if __name__=="__main__":
         img = cv2.imread(str(data_path/im_name))
         crack = sam_quantify_crack(img)
         cv2.imwrite(str(out_path/im_name), crack)   
-        # del mask_generator
-        # del masks
-        # torch.cuda.empty_cache()
     
     
