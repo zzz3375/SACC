@@ -1,7 +1,7 @@
 #%%
 import os
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
-import torch
+# import torch
 import cv2
 import numpy as np
 from pathlib import Path
