@@ -42,4 +42,4 @@ yarn.lock
 package-lock.json
 
 # data
-data/crack dataset (bridge, pavement, rail)/
+data/
