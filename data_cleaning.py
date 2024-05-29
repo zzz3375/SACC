@@ -4,10 +4,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 import cv2
 import shutil
 import xmltodict
+import matplotlib.pyplot as plt
 # %%
 raw_data_infos = [
     {
@@ -82,24 +83,48 @@ if __name__ == '__main__':
         elif raw_data_info["annotated"] and raw_data_info["type"] == "Detection":
             raw_data_path = Path(raw_data_info["path"])
             if (raw_data_path/"JPEGImages").exists():
+                
                 image_files = os.listdir(raw_data_path/"JPEGImages")
                 img_out_dir = raw_data_path.parent.parent/"crack_dataset_cleaned"/raw_data_path.name/"JPEGImages"
+                ann_out_dir = raw_data_path.parent.parent/"crack_dataset_cleaned"/raw_data_path.name/"Annotations"
                 if not img_out_dir.exists():
                     shutil.copytree(raw_data_path/"JPEGImages", img_out_dir)
-                for id in range(len(image_files)):
-
-                    id = np.random.randint(0,len(image_files)) #!!!!!!!!!!!!!!!!!!!!!!!!!   
-
-                    image_name = image_files[id]
-                    image_file = raw_data_path/"JPEGImages"/image_name
-                    annotation_file = raw_data_path/"Annotations"/(image_name[:-3]+"xml")
+                if not ann_out_dir.exists():
+                    shutil.copytree(raw_data_path/"Annotations", ann_out_dir)
+                check_ann=False
+                if check_ann:
                     
-                    with open(annotation_file,"r") as f:
+                    for id in range(len(image_files)):
+
+                        id = np.random.randint(0,len(image_files)) #!!!!!!!!!!!!!!!!!!!!!!!!!   
+
+                        image_name = image_files[id]
+                        image_file = raw_data_path/"JPEGImages"/image_name
+                        annotation_file = raw_data_path/"Annotations"/(image_name[:-3]+"xml")
+                        image = np.array(Image.open(image_file).convert('L'))                    
+                        
+                        f = open(annotation_file,"r")
                         ann_xml = f.read()   
-                        ann_dict = xmltodict.parse(ann_xml)['annotation']['object']['bndbox']
-                        for key in ann_dict.keys():
-                            ann_dict[key]=eval(ann_dict[key])
-                        globals().update(ann_dict)
+                        ann_dicts = xmltodict.parse(ann_xml)['annotation']['object']
+                        if isinstance(ann_dicts,dict): 
+                            ann_dict = ann_dicts["bndbox"]
+                            for key in ann_dict.keys():
+                                ann_dict[key]=np.round(eval(ann_dict[key])).astype(int)
+                            globals().update(ann_dict)
+                            out = cv2.rectangle(image,[xmin,ymin],[xmax,ymax],(255,0,0),1)
+                        elif isinstance(ann_dicts,list):
+                            for ann_dict in ann_dicts:
+                                ann_dict = ann_dict["bndbox"]
+                                for key in ann_dict.keys():
+                                    ann_dict[key]=np.round(eval(ann_dict[key])).astype(int)  
+                                globals().update(ann_dict)
+                                out = cv2.rectangle(image,[xmin,ymin],[xmax,ymax],(255,0,0),1)                                                       
+                        cv2.imwrite("temp.png",out)
+                        pass
+
+                        
+
+                    
 
                     
                     pass       
