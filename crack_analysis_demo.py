@@ -8,9 +8,10 @@ from pathlib import Path
 # import matplotlib.pyplot as plt
 
 #%%
-def edge_supression(mask, e=8):
+def edge_supression(mask):
     h,w=mask.shape
     out = np.zeros_like(mask)
+    e = np.round(min(h,w)/110).astype(int)
     out[e:h-e,e:w-e] = mask[e:h-e,e:w-e]
     return out
 
@@ -22,7 +23,8 @@ def sam_quantify_crack(img):
     sam.to(device=device)
     mask_generator = SamAutomaticMaskGenerator(sam)
     masks = mask_generator.generate(img)
-    filtered_masks = filter(lambda  mask: mask["area"]>70_000, masks)
+    img_area = np.prod(img.shape[:2])
+    filtered_masks = filter(lambda  mask: (mask["area"]/ img_area) > 0.15, masks)
     
     crack = np.ones_like(masks[0]["segmentation"], dtype=bool)
     for mask in filtered_masks:
