@@ -11,8 +11,8 @@ from pathlib import Path
 def edge_supression(mask):
     h,w=mask.shape
     out = np.zeros_like(mask)
-    e = np.round(min(h,w)/110).astype(int)
-    out[e:h-e,e:w-e] = mask[e:h-e,e:w-e]
+    dh,dw = np.round(np.array(mask.shape)/110 ).astype(int) 
+    out[dh:h-dh,dw:w-dw] = mask[dh:h-dh,dw:w-dw]
     return out
 
 def sam_quantify_crack(img):
