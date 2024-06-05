@@ -19,11 +19,12 @@ def sam_quantify_crack(img):
     model_type = "vit_h"
     device = "cuda"
     
+    img_area = np.prod(img.shape[:2])
     sam = sam_model_registry[model_type](checkpoint=str(sam_checkpoint))
     sam.to(device=device)
     mask_generator = SamAutomaticMaskGenerator(sam)
     masks = mask_generator.generate(img)
-    img_area = np.prod(img.shape[:2])
+    
     filtered_masks = filter(lambda  mask: (mask["area"]/ img_area) > 0.15, masks)
     
     crack = np.ones_like(masks[0]["segmentation"], dtype=bool)
