@@ -15,7 +15,7 @@ def edge_supression(mask):
     out[dh:h-dh,dw:w-dw] = mask[dh:h-dh,dw:w-dw]
     return out
 
-def sam_quantify_crack(img):
+def sam_seg_crack_area(img):
     model_type = "vit_h"
     device = "cuda"
     
