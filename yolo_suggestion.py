@@ -9,8 +9,8 @@ from segment_anything import sam_model_registry, SamPredictor
 import matplotlib.pyplot as plt
 from ultralytics.utils.ops import scale_masks
 # %%
-source = r"data\concrete_crack\0.jpg"
-model_path = r"C:\Users\13694\yolov8-adaptated\runs\segment\train-achieved\weights\best.pt"
+source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0213.jpg"
+model_path = "best.pt"
 def yolo_predict(source, model_path):
     source_image = cv2.imread(source)
     # h,w=source_image.shape[:2]
@@ -18,9 +18,8 @@ def yolo_predict(source, model_path):
     results = model.predict(source)
     # mask_raw = results[0].masks[0].cpu().data.numpy().transpose(1,2,0).squeeze(-1).astype(int)*255
     original_shape = source_image.shape[:2]
-    mask_raw = scale_masks(results[0].masks.data[None,:],original_shape).squeeze().cpu().numpy().astype(int)*255
-    # scale = min(640/h,640/w)
-    # mask_raw = cv2.resize(mask_raw,None,fx=1/scale,fy=1/scale)
+    mask_raw = scale_masks(results[0].masks.data[None,:],original_shape).sum(axis=1).squeeze().cpu().numpy()
+    mask_raw = ( mask_raw >0 ).astype(int) *255
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw
 
@@ -28,7 +27,7 @@ def yolo_predict(source, model_path):
 # mask 2 skeleton points
 mask_raw = yolo_predict(source, model_path)
 def mask2points(mask_raw) -> np.ndarray:
-    skeleton_bool = skeletonize(mask_raw)
+    skeleton_bool = skeletonize(mask_raw,method="lee")
     skeleton_img = skeleton_bool.astype(int)*255
     cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
     h,w = skeleton_bool.shape[:2]
@@ -51,6 +50,9 @@ source_image = cv2.imread(source)
 # mask_raw = cv2.resize(mask_raw,source_image.shape[-2::-1])
 # source_image = cv2.resize(source_image,mask_raw.shape[::-1])
 points = mask2points(mask_raw)
+n = points.shape[0]
+step = n//6
+points = points[::step]
 input_label = np.ones(points.shape[:1])
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
@@ -65,6 +67,7 @@ masks, scores, logits = predictor.predict(
     multimask_output=False,
 )
 cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[0].astype(int)*255)
+print(scores)
 # %%
 plt.figure(figsize=(10,10))
 plt.imshow(source_image)
