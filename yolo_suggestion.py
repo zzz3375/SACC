@@ -19,7 +19,8 @@ def yolo_predict(source):
     # mask_raw = results[0].masks[0].cpu().data.numpy().transpose(1,2,0).squeeze(-1).astype(int)*255
     original_shape = source_image.shape[:2]
     conf = results[0].boxes.conf.cpu().detach().numpy()
-    mask_raw = scale_masks(results[0].masks.data[None,:],original_shape)[conf>0.5].sum(axis=1).squeeze().cpu().numpy()
+    mask_raw_stack = scale_masks(results[0].masks.data[None,:],original_shape)
+    mask_raw = mask_raw_stack[conf>0.5].sum(axis=1).squeeze().cpu().numpy()   
     mask_raw = ( mask_raw >0 ).astype(int) *255
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw
@@ -46,11 +47,11 @@ def mask2points(mask_raw) -> np.ndarray:
 
 
 # show_points
-def show_points(coords, labels, ax, marker_size=375):
-    pos_points = coords[labels==1]
-    neg_points = coords[labels==0]
-    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
-    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)   
+# def show_points(coords, labels, ax, marker_size=375):
+#     pos_points = coords[labels==1]
+#     neg_points = coords[labels==0]
+#     ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
+#     ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)   
 
 # source  and points 2 prompted mask
 # points = mask2points(mask_raw)
@@ -75,21 +76,26 @@ def sam_prompt(source, points):
 
     cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[0].astype(int)*255)
     cv2.imwrite(r"tmp\original_image.jpg",source_image)
-    print(scores)
-    plt.figure(figsize=(10,10))
-    plt.imshow(source_image)
-    show_points(points, input_label, plt.gca())
-    plt.axis('on')
-    plt.savefig(r"tmp\points_prompting.jpg")
-    return masks[0].astype(int)*255
+    # print(scores)
+    # plt.figure(figsize=(10,10))
+    # plt.imshow(source_image)
+    # show_points(points, input_label, plt.gca())
+    # plt.axis('on')
+    # plt.savefig(r"tmp\points_prompting.jpg")
+    
+    for p in points: 
+        # p = np.round(p)
+        source_image = cv2.circle(source_image,p,10,(0,0,255),4)
+    cv2.imwrite("tmp\points_prompting.jpg",source_image)
+    return masks[0].astype(int)*255, scores[0]
 
 def sam_seg_crack_by_prompt(source):
     mask_raw = yolo_predict(source)
     points = mask2points(mask_raw)
-    mask = sam_prompt(source,points)
-    return mask
+    mask, sam_scores = sam_prompt(source,points)
+    return mask, sam_scores
 # %%
 if __name__ == '__main__':
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0213.jpg"
-    mask = sam_seg_crack_by_prompt(source)
+    mask,_ = sam_seg_crack_by_prompt(source)
     pass
