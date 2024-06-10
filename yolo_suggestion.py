@@ -39,10 +39,11 @@ def mask2points(mask_raw) -> np.ndarray:
     points = np.array([x,y]).T
 
     # sample
-    n = points.shape[0]
-    step = n//6
-    points = points[step:-1-step:step]
-
+    # n = points.shape[0]
+    # step = n//12
+    step = 120
+    # points = points[int(step/2):-1-int(step/2):step]
+    points = points[int(step/2)::step]
     return points
 
 
@@ -76,7 +77,7 @@ def sam_prompt(source, points):
 
     cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[scores.argmax()].astype(int)*255)
     cv2.imwrite(r"tmp\original_image.jpg",source_image)
-    print(scores)
+    print(scores[0])
     # plt.figure(figsize=(10,10))
     # plt.imshow(source_image)
     # show_points(points, input_label, plt.gca())
@@ -96,6 +97,6 @@ def sam_seg_crack_by_prompt(source):
     return mask, sam_scores
 # %%
 if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0019.jpg"
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0016.jpg"
     mask, sam_scores = sam_seg_crack_by_prompt(source)
     pass
