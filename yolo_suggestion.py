@@ -41,7 +41,7 @@ def mask2points(mask_raw) -> np.ndarray:
     # sample
     n = points.shape[0]
     step = n//6
-    points = points[int(step/2):-1-int(step/2):step]
+    points = points[step:-1-step:step]
 
     return points
 
@@ -74,9 +74,9 @@ def sam_prompt(source, points):
         multimask_output=False,
     )
 
-    cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[0].astype(int)*255)
+    cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[scores.argmax()].astype(int)*255)
     cv2.imwrite(r"tmp\original_image.jpg",source_image)
-    # print(scores)
+    print(scores)
     # plt.figure(figsize=(10,10))
     # plt.imshow(source_image)
     # show_points(points, input_label, plt.gca())
@@ -85,8 +85,8 @@ def sam_prompt(source, points):
     
     for p in points: 
         # p = np.round(p)
-        source_image = cv2.circle(source_image,p,10,(0,0,255),4)
-    cv2.imwrite("tmp\points_prompting.jpg",source_image)
+        source_image = cv2.circle(source_image,p,4,(0,0,255),4)
+    cv2.imwrite(r"tmp\points_prompting.jpg",source_image)
     return masks[0].astype(int)*255, scores[0]
 
 def sam_seg_crack_by_prompt(source):
@@ -96,6 +96,6 @@ def sam_seg_crack_by_prompt(source):
     return mask, sam_scores
 # %%
 if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0016.jpg"
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0019.jpg"
     mask, sam_scores = sam_seg_crack_by_prompt(source)
     pass
