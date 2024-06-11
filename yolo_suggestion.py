@@ -28,7 +28,7 @@ def yolo_predict(source):
 
 # mask 2 skeleton points
 # mask_raw = yolo_predict(source, model_path)
-def mask2points(mask_raw) -> np.ndarray:
+def mask2points(mask_raw, step = 80) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw,method="lee")
     skeleton_img = skeleton_bool.astype(int)*255
     cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
@@ -41,7 +41,7 @@ def mask2points(mask_raw) -> np.ndarray:
     # sample
     # n = points.shape[0]
     # step = n//12
-    step = 120
+    # step = 80
     # points = points[int(step/2):-1-int(step/2):step]
     points = points[int(step/2)::step]
     return points
@@ -90,13 +90,13 @@ def sam_prompt(source, points):
     cv2.imwrite(r"tmp\points_prompting.jpg",source_image)
     return masks[0].astype(int)*255, scores[0]
 
-def sam_seg_crack_by_prompt(source):
+def sam_seg_crack_by_prompt(source, step=80):
     mask_raw = yolo_predict(source)
-    points = mask2points(mask_raw)
+    points = mask2points(mask_raw,step)
     mask, sam_scores = sam_prompt(source,points)
     return mask, sam_scores
 # %%
 if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0016.jpg"
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0006.jpg"
     mask, sam_scores = sam_seg_crack_by_prompt(source)
     pass
