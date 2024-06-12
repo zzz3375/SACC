@@ -8,7 +8,7 @@ from skimage.morphology import skeletonize
 from segment_anything import sam_model_registry, SamPredictor
 import matplotlib.pyplot as plt
 from ultralytics.utils.ops import scale_masks
-
+from pathlib import Path
 #%%
 def yolo_predict(source):
     model_path = "best.pt"
@@ -21,13 +21,11 @@ def yolo_predict(source):
     conf = results[0].boxes.conf.cpu().detach().numpy()
     mask_raw_stack = scale_masks(results[0].masks.data[None,:],original_shape)
     mask_raw = mask_raw_stack[conf>0.5].sum(axis=1).squeeze().cpu().numpy()   
-    mask_raw = ( mask_raw >0 ).astype(int) *255
+    mask_raw = ( mask_raw >0 ).astype(np.uint8) *255
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw
 
 
-# mask 2 skeleton points
-# mask_raw = yolo_predict(source, model_path)
 def mask2points(mask_raw, step = 80) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw,method="lee")
     skeleton_img = skeleton_bool.astype(int)*255
@@ -45,17 +43,6 @@ def mask2points(mask_raw, step = 80) -> np.ndarray:
     # points = points[int(step/2):-1-int(step/2):step]
     points = points[int(step/2)::step]
     return points
-
-
-# show_points
-# def show_points(coords, labels, ax, marker_size=375):
-#     pos_points = coords[labels==1]
-#     neg_points = coords[labels==0]
-#     ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
-#     ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)   
-
-# source  and points 2 prompted mask
-# points = mask2points(mask_raw)
 
 def sam_prompt(source, points):
     source_image = cv2.imread(source)
@@ -88,15 +75,29 @@ def sam_prompt(source, points):
         # p = np.round(p)
         source_image = cv2.circle(source_image,p,4,(0,0,255),4)
     cv2.imwrite(r"tmp\points_prompting.jpg",source_image)
-    return masks[0].astype(int)*255, scores[0]
+    return masks[0].astype(np.uint8)*255, scores[0]
+
+def morno_coorrection(img):
+    m = int(max(img.shape[:2])*0.020)
+    n = int(max(img.shape[:2])*0.007)
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (m,m))
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (n,n))
+    out = cv2.morphologyEx(img,cv2.MORPH_OPEN,kernel_open)
+    out = cv2.morphologyEx(out,cv2.MORPH_CLOSE,kernel_close)
+    cv2.imwrite(r"tmp\SAM_prompting_morno.jpg", out)        
+    return out
 
 def sam_seg_crack_by_prompt(source, step=80):
+    Path("tmp").mkdir(parents=1,exist_ok=1)
     mask_raw = yolo_predict(source)
     points = mask2points(mask_raw,step)
     mask, sam_scores = sam_prompt(source,points)
+    mask = morno_coorrection(mask)
     return mask, sam_scores
+
 # %%
 if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0006.jpg"
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
     mask, sam_scores = sam_seg_crack_by_prompt(source)
+
     pass
