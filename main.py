@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import os
 import pandas as pd
+from PIL import Image
 # %% Initialize overall metrics table
 eval_metrics = "Precision	Recall	IoU	PA".split("\t") # ['Precision', 'Recall', 'IoU', 'PA']
 statistic_metrics = "Mean STD".split(" ")
@@ -25,7 +26,9 @@ for data_dir in data_dirs:
     for img_name in img_names:
         source = str(data_dir/"JPEGImages"/img_name)
         ann_file = str(data_dir/"Annotations"/(img_name[:-3]+"png"))
-
+        proposed, score = sam_seg_crack_by_prompt(source)
+        print(score)
+        ground_truth = np.asarray(Image.open(ann_file))
         # compare !
 
         pass
