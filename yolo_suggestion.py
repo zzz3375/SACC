@@ -25,7 +25,6 @@ def yolo_predict(source):
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw
 
-
 def mask2points(mask_raw, step = 80) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw,method="lee")
     skeleton_img = skeleton_bool.astype(int)*255
@@ -92,7 +91,7 @@ def sam_seg_crack_by_prompt(source, step=80):
     mask_raw = yolo_predict(source)
     points = mask2points(mask_raw,step)
     mask, sam_scores = sam_prompt(source,points)
-    mask = morno_coorrection(mask)
+    # mask = morno_coorrection(mask)
     return mask, sam_scores
 
 # %%
