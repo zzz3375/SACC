@@ -81,18 +81,10 @@ def morno_coorrection(img):
     n = int(max(img.shape[:2])*0.007)
     kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (m,m))
     kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (n,n))
-    out = cv2.morphologyEx(img,cv2.MORPH_OPEN,kernel_open)
+    # out = cv2.morphologyEx(img,cv2.MORPH_OPEN,kernel_open)
     out = cv2.morphologyEx(out,cv2.MORPH_CLOSE,kernel_close)
     cv2.imwrite(r"tmp\SAM_prompting_morno.jpg", out)        
     return out
-
-def sam_seg_crack_by_prompt(source, step=80):
-    Path("tmp").mkdir(parents=1,exist_ok=1)
-    mask_raw, yolo_conf = yolo_predict(source)
-    points = mask2points(mask_raw,step)
-    mask, sam_scores = sam_prompt(source,points)
-    mask_morno = morno_coorrection(mask)
-    return mask, sam_scores, yolo_conf
 
 def contour_aera(con,mask):
     tmp = np.zeros_like(mask)
@@ -114,10 +106,19 @@ def contour_optimization(mask,yolo_conf):
         out = cv2.fillPoly(out,[con.squeeze(axis=1)],255)
     cv2.imwrite(r"tmp\SAM_contour_filter.jpg", out)
     return out
+
+def sam_seg_crack_by_prompt(source, step=80):
+    Path("tmp").mkdir(parents=1,exist_ok=1)
+    mask_raw, yolo_conf = yolo_predict(source)
+    points = mask2points(mask_raw,step)
+    mask, sam_scores = sam_prompt(source,points)
+    mask = contour_optimization(mask,yolo_conf)
+    mask_morno = morno_coorrection(mask)
+    return mask_morno, sam_scores, yolo_conf
+
+
 # %%
 if __name__ == '__main__':
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
     mask, sam_scores, yolo_conf = sam_seg_crack_by_prompt(source)
-    
-    contours_accepted = contour_optimization(mask,yolo_conf)
     pass
