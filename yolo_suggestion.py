@@ -20,10 +20,10 @@ def yolo_predict(source):
     original_shape = source_image.shape[:2]
     conf = results[0].boxes.conf.cpu().detach().numpy()
     mask_raw_stack = scale_masks(results[0].masks.data[None,:],original_shape)
-    mask_raw = mask_raw_stack[conf>0.5].sum(axis=1).squeeze().cpu().numpy()   
+    mask_raw = mask_raw_stack.squeeze(dim=0)[conf>0.5].sum(axis=0).cpu().numpy()   
     mask_raw = ( mask_raw >0 ).astype(np.uint8) *255
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
-    return mask_raw
+    return mask_raw, conf
 
 def mask2points(mask_raw, step = 80) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw,method="lee")
@@ -88,15 +88,36 @@ def morno_coorrection(img):
 
 def sam_seg_crack_by_prompt(source, step=80):
     Path("tmp").mkdir(parents=1,exist_ok=1)
-    mask_raw = yolo_predict(source)
+    mask_raw, yolo_conf = yolo_predict(source)
     points = mask2points(mask_raw,step)
     mask, sam_scores = sam_prompt(source,points)
-    # mask = morno_coorrection(mask)
-    return mask, sam_scores
+    mask_morno = morno_coorrection(mask)
+    return mask, sam_scores, yolo_conf
 
+def contour_aera(con,mask):
+    tmp = np.zeros_like(mask)
+    mask_i = cv2.fillPoly(tmp,con,255)
+    aera = np.sum(mask_i>0)
+    # print(aera)
+    return aera
+
+def contour_optimization(mask,yolo_conf):
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    out = cv2.drawContours(np.zeros_like(mask), contours, -1, 255, 1)
+    cv2.imwrite(r"tmp\contours.jpg",out)
+    contours_sorted = sorted(contours, key = lambda con: contour_aera(con, mask=mask), reverse=1)
+    contours_accepted = contours_sorted[:np.sum(yolo_conf>0.5)]
+    out = cv2.drawContours(np.zeros_like(mask), contours_accepted, -1, 255, 1)
+    cv2.imwrite(r"tmp\contours_filtered.jpg", out)
+    out = np.zeros_like(mask)
+    for con in contours_accepted:
+        out = cv2.fillPoly(out,[con.squeeze(axis=1)],255)
+    cv2.imwrite(r"tmp\SAM_contour_filter.jpg", out)
+    return out
 # %%
 if __name__ == '__main__':
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
-    mask, sam_scores = sam_seg_crack_by_prompt(source)
-
+    mask, sam_scores, yolo_conf = sam_seg_crack_by_prompt(source)
+    
+    contours_accepted = contour_optimization(mask,yolo_conf)
     pass
