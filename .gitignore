@@ -45,3 +45,4 @@ package-lock.json
 data/
 # tmp
 tmp/
+data.zip

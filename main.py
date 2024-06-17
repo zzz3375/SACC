@@ -29,8 +29,9 @@ for data_dir in data_dirs:
 
     for img_name in img_names:
         source = str(data_dir/"JPEGImages"/img_name)
+        print(source)
         ann_file = str(data_dir/"Annotations"/(img_name[:-3]+"png"))
-        proposed_mask, score = sam_seg_crack_by_prompt(source)
+        proposed_mask = sam_seg_crack_by_prompt(source)
 
 
         ground_truth = np.asarray(Image.open(ann_file))
