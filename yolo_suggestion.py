@@ -4,7 +4,7 @@
 import numpy as np
 from ultralytics import YOLO
 import cv2
-from skimage.morphology import skeletonize
+from skimage.morphology import skeletonize, medial_axis
 from segment_anything import sam_model_registry, SamPredictor
 import matplotlib.pyplot as plt
 from ultralytics.utils.ops import scale_masks
@@ -28,7 +28,7 @@ def yolo_predict(source, debug=True):
     return mask_raw, conf
 
 def mask2points(mask_raw, debug=True) -> np.ndarray:
-    skeleton_bool = skeletonize(mask_raw,method="lee")
+    skeleton_bool = skeletonize(mask_raw)
     skeleton_img = skeleton_bool.astype(np.uint8)*255
     if debug: cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
     h,w = skeleton_bool.shape[:2]
@@ -126,7 +126,8 @@ def sam_seg_crack_by_prompt(source, debug=1):
     else: 
         mask_accepted = mask_sam
         if debug: print("accept SAM")
-    if debug: cv2.imwrite(r"tmp\accepted_result.jpg",mask_accepted)
+    if debug: 
+        cv2.imwrite(r"tmp\accepted_result.jpg",mask_accepted)
     return mask_accepted
 
 
