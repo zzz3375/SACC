@@ -29,7 +29,7 @@ def yolo_predict(source, debug=True):
 
 def mask2points(mask_raw, debug=True) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw,method="lee")
-    skeleton_img = skeleton_bool.astype(int)*255
+    skeleton_img = skeleton_bool.astype(np.uint8)*255
     if debug: cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
     h,w = skeleton_bool.shape[:2]
     skeleton_index = np.where(skeleton_bool.ravel())[0]
@@ -74,7 +74,7 @@ def sam_prompt(source, points, debug=True):
     
     for p in points: 
         # p = np.round(p)
-        source_image = cv2.circle(source_image,p,2,(0,0,255),1)
+        source_image = cv2.circle(source_image,p,4,(0,0,255),4)
     if debug: cv2.imwrite(r"tmp\points_prompting.jpg",source_image)
     return masks[0].astype(np.uint8)*255, scores[0]
 
@@ -132,8 +132,8 @@ def sam_seg_crack_by_prompt(source, debug=1):
 
 # %%
 if __name__ == '__main__':
-    # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
-    source = r"data\crack\JPEGImages\19.jpg" #fine cracks
+    # source = r"data\crack\JPEGImages\19.jpg" #fine cracks
     mask = sam_seg_crack_by_prompt(source, debug=1)
     pass
