@@ -7,6 +7,7 @@ import pandas as pd
 from PIL import Image
 import cv2
 import matplotlib.pyplot as plt
+from skimage.morphology import medial_axis
 # %% Initialize overall metrics table
 eval_metrics = "Precision	Recall	IoU	PA".split("\t") # ['Precision', 'Recall', 'IoU', 'PA']
 statistic_metrics = "Mean STD".split(" ")
@@ -26,6 +27,7 @@ rr=[]
 
 pp_yolo = []
 rr_yolo = []
+crack_width = []
 # %%
 data_dirs = [Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg")]
 for data_dir in data_dirs:
@@ -39,6 +41,7 @@ for data_dir in data_dirs:
         proposed_mask = sam_seg_crack_by_prompt(source, debug = 0)
         ground_truth = np.asarray(Image.open(ann_file))
         yolo_mask = cv2.imread(r"tmp\yolo_raw_result.jpg", cv2.IMREAD_GRAYSCALE)
+        ske, dst = medial_axis(ground_truth, return_distance=1 )
         # compare !
         if proposed_mask.sum()>0 and ground_truth.sum()>0 and yolo_mask.sum()>0:
             
@@ -52,6 +55,7 @@ for data_dir in data_dirs:
             
             pp_yolo.append(p_yolo)
             rr_yolo.append(r_yolo)
+            crack_width.append(dst.max())
 
         pass
 
@@ -59,7 +63,9 @@ np.save(r"tmp\pp",pp)
 np.save(r"tmp\rr",rr)
 
 np.save(r"tmp\pp_yolo",pp_yolo)
-np.savez(r"tmp\rr_yolo",rr_yolo)
+np.save(r"tmp\rr_yolo",rr_yolo)
+
+np.save(r"tmp\width", crack_width)
 
 plt.scatter(rr,pp)
 plt.scatter(rr_yolo, pp_yolo)
