@@ -23,6 +23,9 @@ metric_table_head = pd.MultiIndex.from_arrays(np.array([metric_table_head_up,
                                                         metric_table_head_down]))
 pp=[]
 rr=[]
+
+pp_yolo = []
+rr_yolo = []
 # %%
 data_dirs = [Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg")]
 for data_dir in data_dirs:
@@ -35,12 +38,29 @@ for data_dir in data_dirs:
         ann_file = str(data_dir/"Annotations"/(img_name[:-3]+"png"))
         proposed_mask = sam_seg_crack_by_prompt(source, debug = 0)
         ground_truth = np.asarray(Image.open(ann_file))
+        yolo_mask = cv2.imread(r"tmp\yolo_raw_result.jpg", cv2.IMREAD_GRAYSCALE)
         # compare !
-        p = (ground_truth/255*proposed_mask/255).sum()/(proposed_mask.sum()/255)
-        r = (ground_truth/255*proposed_mask/255).sum()/(ground_truth.sum()/255)
-        pp.append(p)
-        rr.append(r)
+        if proposed_mask.sum()>0 and ground_truth.sum()>0 and yolo_mask.sum()>0:
+            
+            p = (ground_truth/255*proposed_mask/255).sum()/(proposed_mask.sum()/255)
+            r = (ground_truth/255*proposed_mask/255).sum()/(ground_truth.sum()/255)
+            pp.append(p)
+            rr.append(r)
+
+            p_yolo = (ground_truth/255*yolo_mask/255).sum()/(yolo_mask.sum()/255)
+            r_yolo = (ground_truth/255*yolo_mask/255).sum()/(ground_truth.sum()/255)
+            
+            pp_yolo.append(p_yolo)
+            rr_yolo.append(r_yolo)
+
         pass
 
+np.save(r"tmp\pp",pp)
+np.save(r"tmp\rr",rr)
+
+np.save(r"tmp\pp_yolo",pp_yolo)
+np.savez(r"tmp\rr_yolo",rr_yolo)
+
 plt.scatter(rr,pp)
+plt.scatter(rr_yolo, pp_yolo)
 plt.savefig(r"tmp\pr_curve.jpg")

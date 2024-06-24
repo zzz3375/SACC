@@ -24,7 +24,8 @@ def yolo_predict(source, debug=True):
     else: mask_raw_stack = np.zeros([1,1]+list(source_image.shape[:2]), dtype = np.uint8)
     mask_raw = mask_raw_stack.squeeze(axis=0)[conf>0.5].sum(axis=0)  
     mask_raw = ( mask_raw >0 ).astype(np.uint8) *255
-    if debug: cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
+    # if debug: 
+    cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw, conf
 
 def mask2points(mask_raw, debug=True) -> np.ndarray:
