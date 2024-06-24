@@ -55,7 +55,7 @@ for data_dir in data_dirs:
             
             pp_yolo.append(p_yolo)
             rr_yolo.append(r_yolo)
-            crack_width.append(dst.max())
+            crack_width.append(dst[ dst > 0 ].median())
 
         pass
 
