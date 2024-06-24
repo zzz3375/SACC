@@ -42,7 +42,7 @@ def mask2points(mask_raw, debug=True) -> np.ndarray:
     step = n//12
     # step = 80
     # points = points[int(step/2):-1-int(step/2):step]
-    points = points[::step]
+    points = points[::step] if step > 0 else points
     return points
 
 def sam_prompt(source, points, debug=True):
@@ -119,7 +119,7 @@ def sam_seg_crack_by_prompt(source, debug=1):
     mask_sam = morno_coorrection(mask_sam,debug)
 
     # contradictary analysis: 2 model should have coherent prediction
-    conflict = (mask_sam - mask_sam*mask_yolo).astype(bool).sum()/ (mask_yolo).astype(bool).sum()
+    conflict = (mask_sam - mask_sam*mask_yolo).astype(bool).sum()/ (mask_yolo).astype(bool).sum() if (mask_yolo).astype(bool).sum() > 0 else 100
     if  conflict > 2:
         mask_accepted = mask_yolo # prevent the condition that YOLO raw result is not reliable, making some sampling point out of the crack
         if debug: print("accept yolo")
@@ -133,8 +133,8 @@ def sam_seg_crack_by_prompt(source, debug=1):
 
 # %%
 if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
+    # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
-    # source = r"data\crack\JPEGImages\19.jpg" #fine cracks
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0001.jpg"
     mask = sam_seg_crack_by_prompt(source, debug=1)
     pass
