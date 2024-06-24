@@ -6,6 +6,8 @@ import os
 import pandas as pd
 from PIL import Image
 import cv2
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from skimage.morphology import medial_axis
 # %% Initialize overall metrics table
@@ -55,7 +57,7 @@ for data_dir in data_dirs:
             
             pp_yolo.append(p_yolo)
             rr_yolo.append(r_yolo)
-            crack_width.append(dst[ dst > 0 ].median())
+            crack_width.append(np.median(dst[ dst > 0 ]))
 
         pass
 
