@@ -1,7 +1,7 @@
 # %%
 import matplotlib.pyplot as plt 
-import matplotlib as mpl
-mpl.use('webAgg')
+# import matplotlib as mpl
+# mpl.use('webAgg')
 import numpy as np
 # %%
 wid = np.load(r"tmp\width.npy")
