@@ -31,7 +31,7 @@ pp_yolo = []
 rr_yolo = []
 crack_width = []
 # %%
-data_dirs = [Path(r"C:\Users\13694\SACC\data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg")]
+data_dirs = [Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg")]
 for data_dir in data_dirs:
     img_names = os.listdir(data_dir/"JPEGImages")
     
