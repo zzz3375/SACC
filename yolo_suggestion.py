@@ -11,7 +11,7 @@ from ultralytics.utils.ops import scale_masks
 from pathlib import Path
 #%%
 def yolo_predict(source, debug=True):
-    model_path = "best.pt"
+    model_path = "best-SE.pt"
     source_image = cv2.imread(source)
     # h,w=source_image.shape[:2]
     model = YOLO(model_path)
@@ -136,6 +136,6 @@ def sam_seg_crack_by_prompt(source, debug=1):
 if __name__ == '__main__':
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0001.jpg"
+    source = r"C:\Users\13694\SACC\data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
     mask = sam_seg_crack_by_prompt(source, debug=1)
     pass
