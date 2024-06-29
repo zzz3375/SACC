@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 # import matplotlib as mpl
 # mpl.use('webAgg')
 import numpy as np
+from pathlib import Path
 # %%
-wid = np.load(r"tmp\width.npy")
-recall = np.load(r"tmp\rr.npy")
-recall_yolo = np.load(r"tmp\rr_yolo.npy")
+tmpdir = Path("tmp-se-best")
+wid = np.load(tmpdir/"width.npy")
+recall = np.load(tmpdir/"rr.npy")
+recall_yolo = np.load(tmpdir/"rr_yolo.npy")
 wid[wid>30] = wid[wid>30]/wid.max()*10
 # %%
 # plt.clf()

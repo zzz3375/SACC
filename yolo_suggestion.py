@@ -11,7 +11,7 @@ from ultralytics.utils.ops import scale_masks
 from pathlib import Path
 #%%
 def yolo_predict(source, debug=True):
-    model_path = "last.pt"
+    model_path = "last-se.pt"
     source_image = cv2.imread(source)
     # h,w=source_image.shape[:2]
     model = YOLO(model_path)
