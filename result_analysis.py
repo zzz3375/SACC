@@ -84,10 +84,16 @@ def show_recall_improvements():
 dir_names = [f"tmp-{i}-{j}" for i in ["se","yolo"] for j in ["best", "latest"]]
 # %%
 i=0
+epcho_dic = {"best":"Best Validation",
+             "latest": "Epcho 500"}
+me_dic = {"se": "SEA Enhancement",
+          "yolo": "Without SEA Enhancement"}
+indexes = list("ABCD")
 for me in ["se","yolo"]:
-    for epcho in ["best", "latest"]:
+    for epcho in ["latest","best"]:
         tmpdir = Path(f"archived_result\\tmp-{me}-{epcho}")
         ax = plt.subplot(221+i)
         contrast_in_bars(tmpdir, ax)
+        plt.title(f"({indexes[i]}) {me_dic[me]} ({epcho_dic[epcho]})")
         i+=1
 plt.show()
