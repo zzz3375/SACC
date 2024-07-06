@@ -46,3 +46,5 @@ data/
 # tmp
 data.zip
 tmp_width/skeleton.jpg
+gan-result/
+gan-result.zip

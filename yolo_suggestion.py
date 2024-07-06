@@ -136,6 +136,8 @@ def sam_seg_crack_by_prompt(source, debug=1):
 if __name__ == '__main__':
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
-    source = r"C:\Users\13694\SACC\data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0018.jpg"
     mask = sam_seg_crack_by_prompt(source, debug=1)
     pass
+
+# %%
