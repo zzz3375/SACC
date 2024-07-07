@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from ultralytics.utils.ops import scale_masks
 from pathlib import Path
 #%%
-def yolo_predict(source, debug=True):
-    model_path = "last-se.pt"
+def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
+    model_path = yolo_model_path
     source_image = cv2.imread(source)
     # h,w=source_image.shape[:2]
     model = YOLO(model_path)
@@ -28,10 +28,12 @@ def yolo_predict(source, debug=True):
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw, conf
 
-def mask2points(mask_raw, debug=True) -> np.ndarray:
+def mask2points(mask_raw, debug=True, sampling_points = 12) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw)
     skeleton_img = skeleton_bool.astype(np.uint8)*255
-    if debug: cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
+    if debug: 
+        cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
+        np.save(r"tmp\skeleton_length", skeleton_bool.sum())
     h,w = skeleton_bool.shape[:2]
     skeleton_index = np.where(skeleton_bool.ravel())[0]
     y = skeleton_index//w
@@ -40,7 +42,7 @@ def mask2points(mask_raw, debug=True) -> np.ndarray:
 
     # sample
     n = points.shape[0]
-    step = n//12
+    step = n//sampling_points
     # step = 80
     # points = points[int(step/2):-1-int(step/2):step]
     points = points[::step] if step > 0 else points
@@ -110,10 +112,10 @@ def contour_optimization(mask,yolo_conf, debug=1):
     if debug: cv2.imwrite(r"tmp\SAM_contour_filter.jpg", out)
     return out
 
-def sam_seg_crack_by_prompt(source, debug=1):
+def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
     Path("tmp").mkdir(parents=1,exist_ok=1)
     mask_yolo, yolo_conf = yolo_predict(source,debug)
-    points = mask2points(mask_yolo,debug)
+    points = mask2points(mask_yolo,debug, sampling_points=sampling_points)
 
     mask_sam, sam_scores = sam_prompt(source,points,debug)
     mask_sam = contour_optimization(mask_sam,yolo_conf,debug)
@@ -137,6 +139,7 @@ if __name__ == '__main__':
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
     # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0018.jpg"
+    ske_len = np.load(r"tmp\skeleton_length.npy")
     mask = sam_seg_crack_by_prompt(source, debug=1)
     pass
 

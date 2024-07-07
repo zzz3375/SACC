@@ -7,7 +7,7 @@ from pathlib import Path
 import seaborn as sns
 import pandas as pd
 # %%
-tmpdir = Path(r"archived_result\tmp-yolo-best")
+tmpdir = Path(r"tmp")
 wid = np.load(tmpdir/"width.npy")
 recall = np.load(tmpdir/"rr.npy")
 recall_yolo = np.load(tmpdir/"rr_yolo.npy")
@@ -32,7 +32,6 @@ def contrast_in_bars(tmpdir, ax):
     precision_yolo = np.load(tmpdir/"pp_yolo.npy")
     # precision = precision[wid != wid.max()]
     # precision_yolo = precision_yolo[wid != wid.max()]
-    # wid = wid[wid != wid.max()]
     # print(np.sum((recall-recall_yolo)>0)/len(wid))
     # print(np.sum((precision-precision_yolo)>0)/len(wid))
     # print(recall.mean(),recall_yolo.mean())
@@ -81,19 +80,19 @@ def show_recall_improvements():
 # %%
 # sns.set_style('darkgrid')
 # %%
-dir_names = [f"tmp-{i}-{j}" for i in ["se","yolo"] for j in ["best", "latest"]]
-# %%
-i=0
-epcho_dic = {"best":"Best Validation",
-             "latest": "Epcho 500"}
-me_dic = {"se": "SEA Enhancement",
-          "yolo": "Without SEA Enhancement"}
-indexes = list("ABCD")
-for me in ["se","yolo"]:
-    for epcho in ["latest","best"]:
-        tmpdir = Path(f"archived_result\\tmp-{me}-{epcho}")
-        ax = plt.subplot(221+i)
-        contrast_in_bars(tmpdir, ax)
-        plt.title(f"({indexes[i]}) {me_dic[me]} ({epcho_dic[epcho]})")
-        i+=1
-plt.show()
+def se_ablation():
+    dir_names = [f"tmp-{i}-{j}" for i in ["se","yolo"] for j in ["best", "latest"]]
+    i=0
+    epcho_dic = {"best":"Best Validation",
+                "latest": "Epcho 500"}
+    me_dic = {"se": "SEA Enhancement",
+            "yolo": "Without SEA Enhancement"}
+    indexes = list("ABCD")
+    for me in ["se","yolo"]:
+        for epcho in ["latest","best"]:
+            tmpdir = Path(f"archived_result\\tmp-{me}-{epcho}")
+            ax = plt.subplot(221+i)
+            contrast_in_bars(tmpdir, ax)
+            plt.title(f"({indexes[i]}) {me_dic[me]} ({epcho_dic[epcho]})")
+            i+=1
+    plt.show()

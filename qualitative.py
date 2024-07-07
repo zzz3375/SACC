@@ -24,7 +24,7 @@ for file_name in demo_files:
             file_dir = Path(r"tmp\yolo_raw_result.jpg")
         elif method == "2nd Round":
             file_dir = Path(r"tmp\SAM_prompting.jpg")
-        elif method == "Final Desicion (Proposed)":
+        elif method == "Proposed":
             file_dir = Path(r"tmp\accepted_result.jpg")
         elif method == "Manual Annotation":
             file_dir = Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\Annotations") / (file_name[:-3]+"png")
@@ -38,4 +38,5 @@ for file_name in demo_files:
         
         
     i+=1
-plt.show()
+plt.savefig("qualitative.svg", dpi=2000)
+# %%
