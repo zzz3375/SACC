@@ -9,6 +9,7 @@ from segment_anything import sam_model_registry, SamPredictor
 import matplotlib.pyplot as plt
 from ultralytics.utils.ops import scale_masks
 from pathlib import Path
+from PIL import Image
 #%%
 def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
     model_path = yolo_model_path
@@ -136,11 +137,8 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 
 # %%
 if __name__ == '__main__':
-    # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg" #good result
-    # source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\N0042.jpg" #multi-crack
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0018.jpg"
-    ske_len = np.load(r"tmp\skeleton_length.npy")
-    mask = sam_seg_crack_by_prompt(source, debug=1)
+
+
     pass
 
 # %%

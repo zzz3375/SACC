@@ -40,7 +40,7 @@ for data_dir in data_dirs:
         source = str(data_dir/"JPEGImages"/img_name)
         print(source)
         ann_file = str(data_dir/"Annotations"/(img_name[:-3]+"png"))
-        proposed_mask = sam_seg_crack_by_prompt(source, debug = 0)
+        proposed_mask = sam_seg_crack_by_prompt(source, debug = 0, sampling_points=40)
         ground_truth = np.asarray(Image.open(ann_file))
         yolo_mask = cv2.imread(r"tmp\yolo_raw_result.jpg", cv2.IMREAD_GRAYSCALE)
         ske, dst = medial_axis(ground_truth, return_distance=1 )
@@ -69,6 +69,5 @@ np.save(r"tmp\rr_yolo",rr_yolo)
 
 np.save(r"tmp\width", crack_width)
 
-plt.scatter(rr,pp)
-plt.scatter(rr_yolo, pp_yolo)
-plt.savefig(r"tmp\pr_curve.jpg")
+# plt.stem(crack_width, rr-rr_yolo)
+# plt.show()

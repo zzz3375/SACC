@@ -7,19 +7,6 @@ from pathlib import Path
 import seaborn as sns
 import pandas as pd
 # %%
-tmpdir = Path(r"tmp")
-wid = np.load(tmpdir/"width.npy")
-recall = np.load(tmpdir/"rr.npy")
-recall_yolo = np.load(tmpdir/"rr_yolo.npy")
-wid[wid>30] = 0
-# wid = wid[wid != wid.max()]
-# recall = recall[wid != wid.max()]
-# recall_yolo = recall_yolo[wid != wid.max()]
-precision = np.load(tmpdir/"pp.npy")
-precision_yolo = np.load(tmpdir/"pp_yolo.npy")
-
-
-ax = plt.subplot(221)
 def contrast_in_bars(tmpdir, ax):
     wid = np.load(tmpdir/"width.npy")
     recall = np.load(tmpdir/"rr.npy")
@@ -84,7 +71,7 @@ def se_ablation():
     dir_names = [f"tmp-{i}-{j}" for i in ["se","yolo"] for j in ["best", "latest"]]
     i=0
     epcho_dic = {"best":"Best Validation",
-                "latest": "Epcho 500"}
+                "latest": "Epoch 500"}
     me_dic = {"se": "SEA Enhancement",
             "yolo": "Without SEA Enhancement"}
     indexes = list("ABCD")
@@ -96,3 +83,24 @@ def se_ablation():
             plt.title(f"({indexes[i]}) {me_dic[me]} ({epcho_dic[epcho]})")
             i+=1
     plt.show()
+# se_ablation()
+if __name__ == '__main__':
+    tmpdir = Path(r"tmp")
+    wid = np.load(tmpdir/"width.npy")
+    recall = np.load(tmpdir/"rr.npy")
+    recall_yolo = np.load(tmpdir/"rr_yolo.npy")
+    wid[wid>30] = 0
+    # wid = wid[wid != wid.max()]
+    # recall = recall[wid != wid.max()]
+    # recall_yolo = recall_yolo[wid != wid.max()]
+    precision = np.load(tmpdir/"pp.npy")
+    precision_yolo = np.load(tmpdir/"pp_yolo.npy")
+
+    print(np.sum((recall-recall_yolo)>0)/len(wid))
+    print(np.sum((precision-precision_yolo)>0)/len(wid))
+    print(recall.mean(),recall_yolo.mean())
+    print(recall[wid > 10].mean(),recall_yolo[wid > 10].mean())
+    print(precision.mean(),precision_yolo.mean())
+    print(precision[wid > 10].mean(),precision_yolo[wid > 10].mean())
+    
+    pass
