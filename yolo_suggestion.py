@@ -139,6 +139,7 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 if __name__ == '__main__':
 
 
+
     pass
 
 # %%
