@@ -29,7 +29,7 @@ def contrast_in_bars(tmpdir, ax):
                     recall[wid > 10].mean(), recall_yolo[wid > 10].mean(), 
                     precision.mean(), precision_yolo.mean(), 
                     precision[wid > 10].mean(), precision_yolo[wid > 10].mean()])
-    x = ["Recall (All)"]*2 + ["Recall (Width>10)"]*2 + ["Precision (All)"]*2 + ["Precision (Width>10)"]*2
+    x = ["Recall (All)"]*2 + ["Recall (Width>20)"]*2 + ["Precision (All)"]*2 + ["Precision (Width>20)"]*2
     # for i in "ABCD": x+=[i]*2
     id = ["Proposed", "YOLOv8-Seg"]*4
     df = pd.DataFrame(data=np.array([x, id]).T, columns=["x", "Method"])
@@ -46,14 +46,14 @@ def contrast_in_bars(tmpdir, ax):
 #%%
 def show_recall_improvements():
     plt.clf()
-    plt.stem(wid,recall - recall_yolo)
+    plt.stem(wid*2,recall - recall_yolo)
 
     plt.xlabel("Crack Width in Pixel")
     # plt.title("recall_proposed - recall_yolo")
     plt.ylabel("Improvements on Recall Rate")
     # plt.show()
 
-    width = np.load("training_width.npy") # training width
+    width = np.load("training_width.npy")*2 # training width
     xmin= np.min(width)
     xmax = np.max(width)
     y = -0.3
@@ -85,7 +85,7 @@ def se_ablation():
     plt.show()
 # se_ablation()
 if __name__ == '__main__':
-    tmpdir = Path(r"tmp")
+    tmpdir = Path(r"archived_result\tmp-yolo-best")
     wid = np.load(tmpdir/"width.npy")
     recall = np.load(tmpdir/"rr.npy")
     recall_yolo = np.load(tmpdir/"rr_yolo.npy")
@@ -102,5 +102,7 @@ if __name__ == '__main__':
     print(recall[wid > 10].mean(),recall_yolo[wid > 10].mean())
     print(precision.mean(),precision_yolo.mean())
     print(precision[wid > 10].mean(),precision_yolo[wid > 10].mean())
+    # show_recall_improvements()
+    se_ablation()
     
     pass

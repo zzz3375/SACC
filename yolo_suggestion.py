@@ -2,14 +2,22 @@
 # import subprocess
 # import shutil
 import numpy as np
+
+# image processing
 from ultralytics import YOLO
 import cv2
-from skimage.morphology import skeletonize, medial_axis
+from skimage.morphology import skeletonize
+from scipy.ndimage import distance_transform_edt
 from segment_anything import sam_model_registry, SamPredictor
+
+# visulization
 import matplotlib.pyplot as plt
+import seaborn as sns
 from ultralytics.utils.ops import scale_masks
 from pathlib import Path
 from PIL import Image
+
+
 #%%
 def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
     model_path = yolo_model_path
@@ -31,6 +39,9 @@ def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
 
 def mask2points(mask_raw, debug=True, sampling_points = 12) -> np.ndarray:
     skeleton_bool = skeletonize(mask_raw)
+    dist = distance_transform_edt(mask_raw)
+    if debug: np.save(r"tmp\distance-inplace", dist)
+    dist[skeleton_bool==0]=0
     skeleton_img = skeleton_bool.astype(np.uint8)*255
     if debug: 
         cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
@@ -137,8 +148,11 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 
 # %%
 if __name__ == '__main__':
-
-
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
+    sam_seg_crack_by_prompt(source)
+    distance = np.load(r"tmp\distance-inplace.npy")
+    sns.heatmap(distance)
+    plt.show()
 
     pass
 

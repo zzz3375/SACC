@@ -9,7 +9,8 @@ import cv2
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from skimage.morphology import medial_axis
+from skimage.morphology import medial_axis, skeletonize
+from scipy.ndimage import distance_transform_edt
 # %% Initialize overall metrics table
 eval_metrics = "Precision	Recall	IoU	PA".split("\t") # ['Precision', 'Recall', 'IoU', 'PA']
 statistic_metrics = "Mean STD".split(" ")
@@ -43,7 +44,10 @@ for data_dir in data_dirs:
         proposed_mask = sam_seg_crack_by_prompt(source, debug = 0, sampling_points=40)
         ground_truth = np.asarray(Image.open(ann_file))
         yolo_mask = cv2.imread(r"tmp\yolo_raw_result.jpg", cv2.IMREAD_GRAYSCALE)
-        ske, dst = medial_axis(ground_truth, return_distance=1 )
+        # ske, dst = medial_axis(ground_truth, return_distance=1 )
+        ske = skeletonize(ground_truth)
+        dst = distance_transform_edt(ground_truth)
+        dst[ske==0]=0
         # compare !
         if proposed_mask.sum()>0 and ground_truth.sum()>0 and yolo_mask.sum()>0:
             
