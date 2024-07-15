@@ -33,6 +33,7 @@ def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
     else: mask_raw_stack = np.zeros([1,1]+list(source_image.shape[:2]), dtype = np.uint8)
     mask_raw = mask_raw_stack.squeeze(axis=0)[conf>0.5].sum(axis=0)  
     mask_raw = ( mask_raw >0 ).astype(np.uint8) *255
+    ret, mask_raw = cv2.threshold(mask_raw, 127, 255, cv2.THRESH_BINARY)
     # if debug: 
     cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
     return mask_raw, conf
@@ -149,10 +150,45 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 # %%
 if __name__ == '__main__':
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
-    sam_seg_crack_by_prompt(source)
+    # sam_seg_crack_by_prompt(source)
+    h1, h2, w1, w2 = [470, 580, 400, 510]
     distance = np.load(r"tmp\distance-inplace.npy")
-    sns.heatmap(distance)
-    plt.show()
+    ax = plt.subplot(131)
+    img = np.asarray(Image.open(source))
+    mask = cv2.imread(r"tmp\yolo_raw_result.jpg", cv2.IMREAD_GRAYSCALE)
+    ret, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    crack = img[mask>127]
+    img1=img.copy()
+    img1[mask>127] = np.round(crack*0.6 + 0.4*np.array([[255,0,0]]).repeat(crack.shape[0],0)).astype(img.dtype)
+
+    plt.imshow(img1[h1:h2, w1:w2], cmap="gray")
+    ax.set_axis_off()
+    ax.set_title("YOLOv8-Seg")
+    
+    ax = plt.subplot(132)
+    # sns.heatmap(distance[h1:h2, w1:w2])
+    plt.imshow(distance[h1:h2, w1:w2])
+    ax.set_axis_off()
+    ax.set_title("Distance Transforms")
+    
+    ax = plt.subplot(133)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    edge = cv2.drawContours(np.zeros_like(mask), contours, -1, 255, 1)
+     
+
+    ske = np.asarray(Image.open(r"tmp\skeleton.jpg"))
+    ske = ske[:,:,None].repeat(3,-1)
+    ske[edge>127]=[0,255,0]
+
+    points = mask2points(mask, sampling_points=60)
+    for p in points:
+        ske = cv2.circle(ske,p,3,(255,0,0),1)
+    plt.imshow(ske[h1:h2, w1:w2])
+    ax.set_axis_off()
+    ax.set_title("Prompting Points")
+    # plt.show()
+    plt.savefig("1st_Round.svg", dpi=2000)
 
     pass
 
