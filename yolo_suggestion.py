@@ -146,10 +146,9 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
         cv2.imwrite(r"tmp\accepted_result.jpg",mask_accepted)
     return mask_accepted
 
+# %% Demonstration
 
-# %%
-if __name__ == '__main__':
-    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
+def show_distance_and_axis(source):
     # sam_seg_crack_by_prompt(source)
     h1, h2, w1, w2 = [470, 580, 400, 510]
     distance = np.load(r"tmp\distance-inplace.npy")
@@ -164,7 +163,7 @@ if __name__ == '__main__':
 
     plt.imshow(img1[h1:h2, w1:w2], cmap="gray")
     ax.set_axis_off()
-    ax.set_title("YOLOv8-Seg")
+    ax.set_title("YOLOv8 Draft")
     
     ax = plt.subplot(132)
     # sns.heatmap(distance[h1:h2, w1:w2])
@@ -189,7 +188,12 @@ if __name__ == '__main__':
     ax.set_title("Prompting Points")
     # plt.show()
     plt.savefig("1st_Round.svg", dpi=2000)
-
+# %%
+if __name__ == '__main__':
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
+    # show_distance_and_axis(source)
+    # sam_seg_crack_by_prompt(source)
+    
     pass
 
 # %%
