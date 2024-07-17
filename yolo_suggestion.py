@@ -148,9 +148,9 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 
 # %% Demonstration
 
-def show_distance_and_axis(source):
+def show_distance_and_axis(source, h1h2w1w2 = [470, 580, 400, 510]):
     # sam_seg_crack_by_prompt(source)
-    h1, h2, w1, w2 = [470, 580, 400, 510]
+    h1, h2, w1, w2 = h1h2w1w2
     distance = np.load(r"tmp\distance-inplace.npy")
     ax = plt.subplot(131)
     img = np.asarray(Image.open(source))
@@ -191,8 +191,36 @@ def show_distance_and_axis(source):
 # %%
 if __name__ == '__main__':
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
-    # show_distance_and_axis(source)
+    h1h2w1w2 = [470, 580, 400, 510]
+    # show_distance_and_axis(source, h1h2w1w2)
     # sam_seg_crack_by_prompt(source)
+    h1, h2, w1, w2 = h1h2w1w2
+    ret, sam_raw = cv2.threshold(np.asarray(Image.open(r"tmp\SAM_prompting.jpg")),127,255,cv2.THRESH_BINARY)
+    con, hie = cv2.findContours(sam_raw,cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    
+    plt.rcParams.update({"font.size":8})
+    n = 3
+    ax = plt.subplot(1,n,1)
+    plt.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    ax.set_title("SAM Advise")
+    ax.set_axis_off()
+    
+    ax = plt.subplot(1,n,2)
+    sam_raw = sam_raw[:,:,None].repeat(3,-1)
+    sam_raw = np.zeros_like(sam_raw)
+    sam_raw = cv2.drawContours(sam_raw, con, -1, (255,0,0), 1)
+    ax.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    ax.set_title("Border Tracing and Archive")
+    ax.set_axis_off()
+
+    ax = plt.subplot(1,n,3)
+    sam_filtered = np.array(Image.open(r"tmp\SAM_contour_filter.jpg"))
+    ax.imshow(sam_filtered[h1:h2, w1:w2], cmap="gray")
+    ax.set_axis_off()
+    ax.set_title("Output")
+    # plt.show()
+    plt.savefig(r"2nd.svg", dpi=2000)
+
     
     pass
 
