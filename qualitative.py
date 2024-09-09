@@ -7,7 +7,7 @@ import numpy as np
 plt.rcParams.update({'font.size': 6})
 # %%
 data_dir = Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages")
-methods = ["Original Image", "GAN", "YOLOv8-Seg", "2nd Round", "Proposed", "Manual Annotation"]
+methods = ["Original Image","Manual Annotation", "GAN", "YOLOv8-Seg", "2nd Round", "Proposed",]
 demo_files = ["H0003.jpg", "H0007.jpg", "H0009.jpg", "H0020.jpg", "P0018.jpg"]
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
                 wspace=0.1, hspace=0.1)
