@@ -116,7 +116,7 @@ def contour_optimization(mask,yolo_conf, debug=1):
     out = cv2.drawContours(np.zeros_like(mask), contours, -1, 255, 1)
     if debug: cv2.imwrite(r"tmp\contours.png",out)
     contours_sorted = sorted(contours, key = lambda con: contour_aera(con, mask=mask), reverse=1)
-    contours_accepted = contours_sorted[:np.sum(yolo_conf)]
+    contours_accepted = contours_sorted[:len(yolo_conf)]
     out = cv2.drawContours(np.zeros_like(mask), contours_accepted, -1, 255, 1)
     if debug: cv2.imwrite(r"tmp\contours_filtered.png", out)
     out = np.zeros_like(mask)
