@@ -32,7 +32,7 @@ def contrast_in_bars(tmpdir, ax):
                     precision[wid > 10].mean(), precision_yolo[wid > 10].mean()])
     x = ["Recall (All)"]*2 + ["Recall (Width>20)"]*2 + ["Precision (All)"]*2 + ["Precision (Width>20)"]*2
     # for i in "ABCD": x+=[i]*2
-    id = ["Proposed", "YOLOv8-Seg"]*4
+    id = ["Proposed", "Original YOLOv8"]*4
     df = pd.DataFrame(data=np.array([x, id]).T, columns=["x", "Method"])
     df["data"]=data
     sns.barplot(df,x="x", y="data", hue="Method", width=0.6)
