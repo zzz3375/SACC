@@ -50,3 +50,4 @@ gan-result/
 gan-result.zip
 data.7z
 full_results/*
+tmp/*
