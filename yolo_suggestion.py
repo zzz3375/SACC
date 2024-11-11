@@ -116,7 +116,7 @@ def contour_optimization(mask,yolo_conf, debug=1):
     out = cv2.drawContours(np.zeros_like(mask), contours, -1, 255, 1)
     if debug: cv2.imwrite(r"tmp\contours.png",out)
     contours_sorted = sorted(contours, key = lambda con: contour_aera(con, mask=mask), reverse=1)
-    contours_accepted = contours_sorted[:np.sum(yolo_conf>0.6)]
+    contours_accepted = contours_sorted[:np.sum(yolo_conf)]
     out = cv2.drawContours(np.zeros_like(mask), contours_accepted, -1, 255, 1)
     if debug: cv2.imwrite(r"tmp\contours_filtered.png", out)
     out = np.zeros_like(mask)
@@ -125,7 +125,7 @@ def contour_optimization(mask,yolo_conf, debug=1):
     if debug: cv2.imwrite(r"tmp\SAM_contour_filter.png", out)
     return out
 
-def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
+def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 30):
     Path("tmp").mkdir(parents=1,exist_ok=1)
     mask_yolo, yolo_conf = yolo_predict(source,debug)
     points = mask2points(mask_yolo,debug, sampling_points=sampling_points)
