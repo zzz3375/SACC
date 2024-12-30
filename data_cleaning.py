@@ -1,5 +1,4 @@
 # %%
-import supervision as sv
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
@@ -108,6 +107,7 @@ if __name__ == '__main__':
                         ann_dicts = xmltodict.parse(ann_xml)['annotation']['object']
                         if isinstance(ann_dicts,dict): 
                             ann_dict = ann_dicts["bndbox"]
+                            xmin,ymin,xmax,ymax = ann_dict["xmin"],ann_dict["ymin"],ann_dict["xmax"],ann_dict["ymax"]
                             for key in ann_dict.keys():
                                 ann_dict[key]=np.round(eval(ann_dict[key])).astype(int)
                             globals().update(ann_dict)
