@@ -19,7 +19,7 @@ from PIL import Image
 
 
 #%%
-def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
+def yolo_predict(source, debug=True, yolo_model_path = "best-SE.pt"):
     model_path = yolo_model_path
     source_image = cv2.imread(source)
     # h,w=source_image.shape[:2]
