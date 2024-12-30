@@ -95,6 +95,7 @@ def sam_prompt(source, points, debug=True):
     return masks[0].astype(np.uint8)*255, scores[0]
 
 def morno_coorrection(img, debug=1):
+    """deplicated"""
     m = np.ceil(max(img.shape[:2])*0.015).astype(int)
     n = np.ceil(max(img.shape[:2])*0.007).astype(int)
     kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (m,m))
@@ -132,7 +133,7 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
 
     mask_sam, sam_scores = sam_prompt(source,points,debug)
     mask_sam = contour_optimization(mask_sam,yolo_conf,debug)
-    mask_sam = morno_coorrection(mask_sam,debug)
+    # mask_sam = morno_coorrection(mask_sam,debug)
 
     # contradictary analysis: 2 model should have coherent prediction
     conflict = (mask_sam - mask_sam*mask_yolo).astype(bool).sum()/ (mask_yolo).astype(bool).sum() if (mask_yolo).astype(bool).sum() > 0 else 100
@@ -187,14 +188,22 @@ def show_distance_and_axis(source, h1h2w1w2 = [470, 580, 400, 510]):
     ax.set_axis_off()
     ax.set_title("Prompting Points")
     # plt.show()
-    plt.savefig("1st_Round.svg", dpi=2000)
-# %%
-if __name__ == '__main__':
+    plt.savefig("1st_Round.svg", dpi=600)
+
+def show_agent_filter():
     source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
-    h1h2w1w2 = [470, 580, 400, 510]
-    # show_distance_and_axis(source, h1h2w1w2)
-    # sam_seg_crack_by_prompt(source)
+    # h1h2w1w2 = [470, 580, 400, 510]
+    h1h2w1w2 = [0,512,512,1024]
     h1, h2, w1, w2 = h1h2w1w2
+    # show_distance_and_axis(source, h1h2w1w2)
+    sam_seg_crack_by_prompt(source)
+    distance = np.load(r"tmp\distance-inplace.npy")
+    distance_heatmap = (distance/distance.max()*255).astype(np.uint8)
+    # distance_heatmap = np.stack([np.zeros_like(distance_heatmap), np.zeros_like(distance_heatmap), distance_heatmap], axis=-1)
+    distance_heatmap = cv2.applyColorMap(distance_heatmap, cv2.COLORMAP_JET)
+    cv2.imwrite(r"result_demonstration\figures\heatmap.jpg",distance_heatmap[h1:h2, w1:w2])
+
+
     ret, sam_raw = cv2.threshold(np.asarray(Image.open(r"tmp\SAM_prompting.jpg")),127,255,cv2.THRESH_BINARY)
     con, hie = cv2.findContours(sam_raw,cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -218,10 +227,12 @@ if __name__ == '__main__':
     ax.imshow(sam_filtered[h1:h2, w1:w2], cmap="gray")
     ax.set_axis_off()
     ax.set_title("Output")
-    # plt.show()
-    plt.savefig(r"2nd.svg", dpi=2000)
-
-    
+    plt.show()
+    plt.savefig(r"Agent_filter.svg", dpi=600)
     pass
-# 11451
 # %%
+if __name__ == '__main__':
+    source = r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg"
+    sam_seg_crack_by_prompt(source)
+    pass
+
