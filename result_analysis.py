@@ -1,5 +1,6 @@
 # %%
 import matplotlib.pyplot as plt 
+plt.rc("font",size=10)
 # import matplotlib as mpl
 # mpl.use('webAgg')
 import numpy as np
@@ -31,7 +32,7 @@ def contrast_in_bars(tmpdir, ax):
                     precision[wid > 10].mean(), precision_yolo[wid > 10].mean()])
     x = ["Recall (All)"]*2 + ["Recall (Width>20)"]*2 + ["Precision (All)"]*2 + ["Precision (Width>20)"]*2
     # for i in "ABCD": x+=[i]*2
-    id = ["Proposed", "YOLOv8-Seg"]*4
+    id = ["Proposed", "Original YOLOv8"]*4
     df = pd.DataFrame(data=np.array([x, id]).T, columns=["x", "Method"])
     df["data"]=data
     sns.barplot(df,x="x", y="data", hue="Method", width=0.6)
@@ -74,7 +75,7 @@ def se_ablation():
                 "latest": "Epoch 500"}
     me_dic = {"se": "SEA Enhancement",
             "yolo": "Without SEA Enhancement"}
-    indexes = list("ABCD")
+    indexes = list("abcd")
     for me in ["se","yolo"]:
         for epcho in ["latest","best"]:
             tmpdir = Path(f"archived_result\\tmp-{me}-{epcho}")

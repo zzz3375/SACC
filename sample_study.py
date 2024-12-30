@@ -53,7 +53,7 @@ def analysis_sample_study_250():
     yy = curve4(xx, *popt)
     plt.plot(xx, yy, color = "red")
 
-    plt.scatter(samples, p_sam, label = "2nd Round")
+    plt.scatter(samples, p_sam, label = "Original SAM (2023)")
     popt, pcov = curve_fit(curve4, samples[samples<analysis_end], p_sam[samples<analysis_end])
     xx = np.linspace(samples[0], analysis_end, 101)
     yy = curve4(xx, *popt)
@@ -65,7 +65,7 @@ def analysis_sample_study_250():
 
     plt.subplot(122)
     plt.scatter(samples, r, label = "Proposed" )
-    plt.scatter(samples, r_sam, label = "2nd Round" )
+    plt.scatter(samples, r_sam, label = "Original SAM (2023)" )
     
     # popt, pcov = curve_fit(curve4, samples[1:], r[1:])
     # xx = np.linspace(samples, analysis_end, 101)
@@ -90,7 +90,6 @@ def hook(x, a,b,c):
     return a/x+b*np.log(x)+c
 
 
-
 if __name__ == '__main__':
     # sample_study()
     # analysis_sample_study_250()
@@ -102,19 +101,21 @@ if __name__ == '__main__':
     # plt.show()
 
     # source = Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\P0018.jpg")
-    source = Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg")
-    sam_seg_crack_by_prompt(source, sampling_points=20).astype(bool)
-    mask = np.asarray(Image.open(r"tmp\SAM_prompting_morno.jpg")).astype(bool)
-    gt = np.asarray(Image.open(source.parent.parent/"Annotations"/(source.name[:-3]+"png"))).astype(bool)
-    out = np.zeros(list(gt.shape)+[3], dtype = np.uint8)
-    out[gt] = [255, 255, 255]
+    # source = Path(r"data\crack_dataset_cleaned\混凝土桥梁裂缝optic_disc_seg\JPEGImages\H0021.jpg")
+    # sam_seg_crack_by_prompt(source, sampling_points=20).astype(bool)
+    # mask = np.asarray(Image.open(r"tmp\SAM_prompting_morno.jpg")).astype(bool)
+    # gt = np.asarray(Image.open(source.parent.parent/"Annotations"/(source.name[:-3]+"png"))).astype(bool)
+    # out = np.zeros(list(gt.shape)+[3], dtype = np.uint8)
+    # out[gt] = [255, 255, 255]
     
-    t = np.bitwise_and(mask, gt).astype(bool)
-    out[t] = [0,255,0]
+    # t = np.bitwise_and(mask, gt).astype(bool)
+    # out[t] = [0,255,0]
 
-    f = (mask.astype(int)-t.astype(int)).astype(bool)
-    out[f] = [0,0,255]
+    # f = (mask.astype(int)-t.astype(int)).astype(bool)
+    # out[f] = [0,0,255]
 
-    cv2.imwrite(r"tmp\sample-study-2.jpg", out)
+    # cv2.imwrite(r"tmp\sample-study-2.jpg", out)
+    analysis_sample_study_250()
+
     
     pass

@@ -35,7 +35,7 @@ def yolo_predict(source, debug=True, yolo_model_path = "best.pt"):
     mask_raw = ( mask_raw >0 ).astype(np.uint8) *255
     ret, mask_raw = cv2.threshold(mask_raw, 127, 255, cv2.THRESH_BINARY)
     # if debug: 
-    cv2.imwrite(r"tmp\yolo_raw_result.jpg",mask_raw)
+    cv2.imwrite(r"tmp\yolo_raw_result.png",mask_raw)
     return mask_raw, conf
 
 def mask2points(mask_raw, debug=True, sampling_points = 12) -> np.ndarray:
@@ -45,7 +45,7 @@ def mask2points(mask_raw, debug=True, sampling_points = 12) -> np.ndarray:
     dist[skeleton_bool==0]=0
     skeleton_img = skeleton_bool.astype(np.uint8)*255
     if debug: 
-        cv2.imwrite(r"tmp\skeleton.jpg",skeleton_img)
+        cv2.imwrite(r"tmp\skeleton.png",skeleton_img)
         np.save(r"tmp\skeleton_length", skeleton_bool.sum())
     h,w = skeleton_bool.shape[:2]
     skeleton_index = np.where(skeleton_bool.ravel())[0]
@@ -79,7 +79,7 @@ def sam_prompt(source, points, debug=True):
         multimask_output=False,
     )
     if debug:
-        cv2.imwrite(r"tmp\SAM_prompting.jpg",masks[scores.argmax()].astype(int)*255)
+        cv2.imwrite(r"tmp\SAM_prompting.png",masks[scores.argmax()].astype(int)*255)
         cv2.imwrite(r"tmp\original_image.jpg",source_image)
         print(scores[0])
     # plt.figure(figsize=(10,10))
@@ -102,7 +102,7 @@ def morno_coorrection(img, debug=1):
     kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (n,n))
     # out = cv2.morphologyEx(img,cv2.MORPH_OPEN,kernel_open)
     out = cv2.morphologyEx(img,cv2.MORPH_CLOSE,kernel_close)
-    if debug: cv2.imwrite(r"tmp\SAM_prompting_morno.jpg", out)        
+    if debug: cv2.imwrite(r"tmp\SAM_prompting_morno.png", out)        
     return out
 
 def contour_aera(con,mask):
@@ -115,18 +115,18 @@ def contour_aera(con,mask):
 def contour_optimization(mask,yolo_conf, debug=1):
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     out = cv2.drawContours(np.zeros_like(mask), contours, -1, 255, 1)
-    if debug: cv2.imwrite(r"tmp\contours.jpg",out)
+    if debug: cv2.imwrite(r"tmp\contours.png",out)
     contours_sorted = sorted(contours, key = lambda con: contour_aera(con, mask=mask), reverse=1)
-    contours_accepted = contours_sorted[:np.sum(yolo_conf>0.6)]
+    contours_accepted = contours_sorted[:len(yolo_conf)]
     out = cv2.drawContours(np.zeros_like(mask), contours_accepted, -1, 255, 1)
-    if debug: cv2.imwrite(r"tmp\contours_filtered.jpg", out)
+    if debug: cv2.imwrite(r"tmp\contours_filtered.png", out)
     out = np.zeros_like(mask)
     for con in contours_accepted:
         out = cv2.fillPoly(out,[con.squeeze(axis=1)],255)
-    if debug: cv2.imwrite(r"tmp\SAM_contour_filter.jpg", out)
+    if debug: cv2.imwrite(r"tmp\SAM_contour_filter.png", out)
     return out
 
-def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
+def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 30):
     Path("tmp").mkdir(parents=1,exist_ok=1)
     mask_yolo, yolo_conf = yolo_predict(source,debug)
     points = mask2points(mask_yolo,debug, sampling_points=sampling_points)
@@ -144,7 +144,7 @@ def sam_seg_crack_by_prompt(source, debug=1, sampling_points = 12):
         mask_accepted = mask_sam
         if debug: print("accept SAM")
     if debug: 
-        cv2.imwrite(r"tmp\accepted_result.jpg",mask_accepted)
+        cv2.imwrite(r"tmp\accepted_result.png",mask_accepted)
     return mask_accepted
 
 # %% Demonstration
@@ -207,20 +207,20 @@ def show_agent_filter():
     ret, sam_raw = cv2.threshold(np.asarray(Image.open(r"tmp\SAM_prompting.jpg")),127,255,cv2.THRESH_BINARY)
     con, hie = cv2.findContours(sam_raw,cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     
-    plt.rcParams.update({"font.size":8})
-    n = 3
-    ax = plt.subplot(1,n,1)
-    plt.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
-    ax.set_title("SAM Advise")
-    ax.set_axis_off()
+    # plt.rcParams.update({"font.size":8})
+    # n = 3
+    # ax = plt.subplot(1,n,1)
+    # plt.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    # ax.set_title("SAM Advise")
+    # ax.set_axis_off()
     
-    ax = plt.subplot(1,n,2)
-    sam_raw = sam_raw[:,:,None].repeat(3,-1)
-    sam_raw = np.zeros_like(sam_raw)
-    sam_raw = cv2.drawContours(sam_raw, con, -1, (255,0,0), 1)
-    ax.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
-    ax.set_title("Border Tracing and Archive")
-    ax.set_axis_off()
+    # ax = plt.subplot(1,n,2)
+    # sam_raw = sam_raw[:,:,None].repeat(3,-1)
+    # sam_raw = np.zeros_like(sam_raw)
+    # sam_raw = cv2.drawContours(sam_raw, con, -1, (255,0,0), 1)
+    # ax.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    # ax.set_title("Border Tracing and Archive")
+    # ax.set_axis_off()
 
     ax = plt.subplot(1,n,3)
     sam_filtered = np.array(Image.open(r"tmp\SAM_contour_filter.jpg"))
