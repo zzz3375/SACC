@@ -207,20 +207,20 @@ def show_agent_filter():
     ret, sam_raw = cv2.threshold(np.asarray(Image.open(r"tmp\SAM_prompting.jpg")),127,255,cv2.THRESH_BINARY)
     con, hie = cv2.findContours(sam_raw,cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     
-    # plt.rcParams.update({"font.size":8})
-    # n = 3
-    # ax = plt.subplot(1,n,1)
-    # plt.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
-    # ax.set_title("SAM Advise")
-    # ax.set_axis_off()
+    plt.rcParams.update({"font.size":8})
+    n = 3
+    ax = plt.subplot(1,n,1)
+    plt.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    ax.set_title("SAM Advise")
+    ax.set_axis_off()
     
-    # ax = plt.subplot(1,n,2)
-    # sam_raw = sam_raw[:,:,None].repeat(3,-1)
-    # sam_raw = np.zeros_like(sam_raw)
-    # sam_raw = cv2.drawContours(sam_raw, con, -1, (255,0,0), 1)
-    # ax.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
-    # ax.set_title("Border Tracing and Archive")
-    # ax.set_axis_off()
+    ax = plt.subplot(1,n,2)
+    sam_raw = sam_raw[:,:,None].repeat(3,-1)
+    sam_raw = np.zeros_like(sam_raw)
+    sam_raw = cv2.drawContours(sam_raw, con, -1, (255,0,0), 1)
+    ax.imshow(sam_raw[h1:h2, w1:w2], cmap="gray")
+    ax.set_title("Border Tracing and Archive")
+    ax.set_axis_off()
 
     ax = plt.subplot(1,n,3)
     sam_filtered = np.array(Image.open(r"tmp\SAM_contour_filter.jpg"))
